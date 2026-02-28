@@ -1,0 +1,7 @@
+Django==5.0.2
+django-ninja==1.1.0
+djangorestframework-simplejwt
+pydantic==2.6.1
+python-dotenv==1.0.1
+psycopg2-binary==2.9.9
+Pillow
