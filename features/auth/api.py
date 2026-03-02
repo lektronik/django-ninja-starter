@@ -1,29 +1,22 @@
 from ninja import Router
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import authenticate
-from .schemas import TokenObtainPairSchema, TokenRefreshSchema, TokenPairOutSchema, ErrorSchema
+from django.contrib.auth.models import User
+from django.db import IntegrityError
+from .schemas import RegisterSchema, UserOutSchema, ErrorSchema
 
 router = Router(tags=["Auth"])
 
-@router.post("/login", response={200: TokenPairOutSchema, 401: ErrorSchema})
-def login_view(request, data: TokenObtainPairSchema):
-    user = authenticate(username=data.username, password=data.password)
-    if user is None:
-        return 401, {"detail": "Invalid credentials"}
-    
-    refresh = RefreshToken.for_user(user)
-    return {
-        "refresh": str(refresh),
-        "access": str(refresh.access_token),
-    }
-
-@router.post("/refresh", response={200: TokenPairOutSchema, 401: ErrorSchema})
-def refresh_view(request, data: TokenRefreshSchema):
+@router.post("/register", response={201: UserOutSchema, 400: ErrorSchema})
+def register_view(request, data: RegisterSchema):
     try:
-        refresh = RefreshToken(data.refresh)
-        return {
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-        }
+        # Basic validation
+        if User.objects.filter(username=data.username).exists():
+            return 400, {"detail": "Username already exists"}
+            
+        user = User.objects.create_user(
+            username=data.username,
+            email=data.email,
+            password=data.password
+        )
+        return 201, user
     except Exception as e:
-        return 401, {"detail": "Invalid refresh token"}
+        return 400, {"detail": str(e)}

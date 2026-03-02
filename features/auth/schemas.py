@@ -1,16 +1,14 @@
 from ninja import Schema
-from pydantic import Field
 
-class TokenObtainPairSchema(Schema):
+class RegisterSchema(Schema):
     username: str
+    email: str
     password: str
 
-class TokenRefreshSchema(Schema):
-    refresh: str
-
-class TokenPairOutSchema(Schema):
-    access: str
-    refresh: str
+class UserOutSchema(Schema):
+    id: int
+    username: str
+    email: str
 
 class ErrorSchema(Schema):
     detail: str
